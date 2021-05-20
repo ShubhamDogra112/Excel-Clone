@@ -19,8 +19,24 @@ let DefaultProperties = {
 	backgroundColor: '',
 	color: ''
 };
+let fileSaved = true;
+let title = document.querySelector('.title span[id = "name"]');
+let title_span = document.querySelector('.title span[id = "file_status"]');
+
+//renaming the title
+title.addEventListener('dblclick', (e) => {
+	title.setAttribute('contenteditable', true);
+});
+
+title.addEventListener('keydown', (e) => {
+	if (e.key === 'Enter') {
+		title.setAttribute('contenteditable', false);
+	}
+});
 
 function updateSheetData(property, value) {
+	fileSaved = false;
+	title_span.innerText = "(unsaved)";
 	if (value !== DefaultProperties[property]) {
 		let selectedCells = document.querySelectorAll('.selected');
 		for (let selectedCell of selectedCells) {
@@ -614,6 +630,8 @@ function addListenersToSheet(sheet) {
 function createNewSheet() {
 	//resetting the sheets
 	emptySheet();
+	fileSaved = false;
+	title_span.innerText = "(unsaved)";
 
 	let newSheetNo = Number.parseInt(Object.keys(sheets).length) + 1 + '';
 	sheets[newSheetNo] = {};
@@ -648,4 +666,122 @@ for (let sheet of bottomSheets) {
 	addListenersToSheet(sheet);
 }
 
-//  logic related to sheets ends
+//  logic related to sheet arrows
+let arrows = document.querySelectorAll('svg[name = "arrows"]');
+for (let arrow of arrows) {
+	arrow.addEventListener('click', () => {
+		let name = arrow.getAttribute('id');
+		if (Object.keys(sheets).length > 1) {
+			if (name === 'prev') {
+				let sheetSelected = document.querySelector('.sheet_selected');
+				let no = sheetSelected.getAttribute('no');
+				if (no !== '1') {
+					sheetClickHandler(sheetSelected.previousElementSibling);
+				}
+			}
+			else {
+				let sheetSelected = document.querySelector('.sheet_selected');
+				let no = sheetSelected.getAttribute('no');
+				if (no !== Object.keys(sheets).length + "") {
+					sheetClickHandler(sheetSelected.nextElementSibling);
+				}
+			}
+		}
+	});
+}
+
+
+//openig of the file drawer
+let file = document.querySelector('.menuBarItem.file');
+let drawer = document.querySelector('.fileDrawer');
+let overlay = document.querySelector('.overlay');
+file.addEventListener('click', ()=> {
+	drawer.classList.add('move');
+	overlay.style.display = 'block';
+})
+
+let closingIcon = document.querySelector('.icon_leftArrow')
+closingIcon.addEventListener('click', () =>{
+	drawer.classList.remove('move');
+	overlay.style.display = 'none';
+})
+
+overlay.addEventListener('click', () => {
+	let modal = document.querySelector('.modal');
+	drawer.classList.remove('move');
+	overlay.style.display = 'none';
+	modal.classList.add('modal_remove');
+})
+
+
+
+//file related functions for the excel book
+let new_btn = document.querySelector('.items.new');
+let save_btn = document.querySelector('.items.save');
+let open_btn = document.querySelector('.items.open');
+new_btn.addEventListener('click', () => {
+	window.open("http://127.0.0.1:5500/");
+	drawer.classList.remove('move');
+	drawer.style.transitionDuration = '0s'; 
+	overlay.style.display = 'none';
+})
+
+//prevent closing of the tab
+window.addEventListener('beforeunload', function (e) {
+    e.preventDefault();
+	if(!fileSaved){
+    	e.returnValue =  'Arr you sure you want to leave the website?';
+	}
+	else{
+		console.log("No changes in the file");
+	}
+});
+
+
+//downloading the file
+function download(filename, text) {
+    let a = document.createElement('a');
+    a.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    a.setAttribute('download', filename);
+
+    if (document.createEvent) {
+        let event = document.createEvent('MouseEvents');
+        event.initEvent('click', true, true);
+        a.dispatchEvent(event);
+    }
+    else {
+        a.click();
+    }
+}
+
+
+//saving file into the system
+function saveFile(){
+	drawer.classList.remove('move');
+	let modal = document.querySelector('.modal');
+	let file_input = document.querySelector('.input');
+	let saveBtn = document.querySelector('.save_file');
+	modal.classList.remove('modal_remove');
+	overlay.style.display = 'block';
+
+	file_input.addEventListener('change', e => {
+		title.innerText = e.target.value;
+	})
+
+	saveBtn.addEventListener('click', () => {
+		let data_file = JSON.stringify(sheets);
+		let filename = document.querySelector('.title span[id = "name"]').innerText + ".json";
+		download(filename, data_file);
+		modal.classList.add('modal_remove');
+		overlay.style.display = 'none';
+	})
+
+	fileSaved = true;
+	title_span.innerText = "(saved)";
+}
+
+save_btn.addEventListener('click', ()=> {
+	saveFile();
+})
+
+//saving the current excel book
