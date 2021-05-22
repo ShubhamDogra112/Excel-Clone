@@ -863,6 +863,7 @@ for(let btn of cut_copy_btn){
 			let col = sc.getAttribute('col');
 			let key = row + "-" + col;
 			if(sheets[selectedSheet][key] != undefined){
+				console.log("running");
 				clipboard.cells[key + '-' + selectedSheet] = {
 					...sheets[selectedSheet][key]
 				};
@@ -886,6 +887,8 @@ paste_btn.addEventListener('click', () => {
 			addDataToCell({...DefaultProperties}, cell);
 		}
 	}
+
+	clipboard.action = 'copy'
 	for(let k in clipboard.cells){
 		let row = Number.parseInt(k.split('-')[0]);
 		let col = Number.parseInt(k.split('-')[1]);
@@ -894,7 +897,7 @@ paste_btn.addEventListener('click', () => {
 
 		let nr = startCell.row + Math.abs(clipboard.start_cell.row - row);
 		let nc = startCell.col + Math.abs(clipboard.start_cell.col - col);
-		let newKey = nr + "-" + nc + '-' + selectedSheet;
+		let newKey = nr + "-" + nc;
 		sheets[selectedSheet][newKey] = {
 				...clipboard.cells[key + '-' + sname]
 		}
