@@ -7,6 +7,9 @@ let column = 25;
 let sheets = {
 	'1': {}
 };
+let sheetNames = {
+	'1': ""
+}
 let selectedSheet = '1';
 let DefaultProperties = {
 	fontFamily: 'Noto Sans',
@@ -36,7 +39,7 @@ title.addEventListener('keydown', (e) => {
 
 function updateSheetData(property, value) {
 	fileSaved = false;
-	title_span.innerText = "(unsaved)";
+	title_span.innerText = '(unsaved)';
 	if (value !== DefaultProperties[property]) {
 		let selectedCells = document.querySelectorAll('.selected');
 		for (let selectedCell of selectedCells) {
@@ -337,8 +340,8 @@ for (let cell of cells) {
 	cell.addEventListener('mousedown', (e) => {
 		// 1 == left click , 2 == right click // 0 no click
 		if (e.buttons == 1) {
-			startCell.row = e.target.getAttribute('row');
-			startCell.col = e.target.getAttribute('col');
+			startCell.row = Number.parseInt(e.target.getAttribute('row'));
+			startCell.col = Number.parseInt(e.target.getAttribute('col'));
 		}
 	});
 
@@ -560,6 +563,7 @@ function addDataToCell(obj, el) {
 
 function loadCurrentSheetData(no) {
 	let cells = sheets[no];
+
 	for (let key in cells) {
 		let obj = cells[key];
 		let row = key.split('-')[0];
@@ -631,7 +635,7 @@ function createNewSheet() {
 	//resetting the sheets
 	emptySheet();
 	fileSaved = false;
-	title_span.innerText = "(unsaved)";
+	title_span.innerText = '(unsaved)';
 
 	let newSheetNo = Number.parseInt(Object.keys(sheets).length) + 1 + '';
 	sheets[newSheetNo] = {};
@@ -678,11 +682,10 @@ for (let arrow of arrows) {
 				if (no !== '1') {
 					sheetClickHandler(sheetSelected.previousElementSibling);
 				}
-			}
-			else {
+			} else {
 				let sheetSelected = document.querySelector('.sheet_selected');
 				let no = sheetSelected.getAttribute('no');
-				if (no !== Object.keys(sheets).length + "") {
+				if (no !== Object.keys(sheets).length + '') {
 					sheetClickHandler(sheetSelected.nextElementSibling);
 				}
 			}
@@ -690,73 +693,66 @@ for (let arrow of arrows) {
 	});
 }
 
-
 //openig of the file drawer
 let file = document.querySelector('.menuBarItem.file');
 let drawer = document.querySelector('.fileDrawer');
 let overlay = document.querySelector('.overlay');
-file.addEventListener('click', ()=> {
+file.addEventListener('click', () => {
 	drawer.classList.add('move');
 	overlay.style.display = 'block';
-})
+});
 
-let closingIcon = document.querySelector('.icon_leftArrow')
-closingIcon.addEventListener('click', () =>{
+let closingIcon = document.querySelector('.icon_leftArrow');
+closingIcon.addEventListener('click', () => {
 	drawer.classList.remove('move');
 	overlay.style.display = 'none';
-})
+});
 
 overlay.addEventListener('click', () => {
 	let modal = document.querySelector('.modal');
 	drawer.classList.remove('move');
 	overlay.style.display = 'none';
 	modal.classList.add('modal_remove');
-})
-
-
+});
 
 //file related functions for the excel book
 let new_btn = document.querySelector('.items.new');
 let save_btn = document.querySelector('.items.save');
 let open_btn = document.querySelector('.items.open');
 new_btn.addEventListener('click', () => {
-	window.open("http://127.0.0.1:5500/");
+	window.open('http://127.0.0.1:5500/');
 	drawer.classList.remove('move');
-	drawer.style.transitionDuration = '0s'; 
+	drawer.style.transitionDuration = '0s';
 	overlay.style.display = 'none';
-})
+});
 
 //prevent closing of the tab
-window.addEventListener('beforeunload', function (e) {
-    e.preventDefault();
-	if(!fileSaved){
-    	e.returnValue =  'Arr you sure you want to leave the website?';
-	}
-	else{
-		console.log("No changes in the file");
+window.addEventListener('beforeunload', function(e) {
+	e.preventDefault();
+	if (!fileSaved) {
+		e.returnValue = 'Arr you sure you want to leave the website?';
+	} else {
+		console.log('No changes in the file');
 	}
 });
 
-
 //downloading the file
 function download(filename, text) {
-    let a = document.createElement('a');
-    a.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-    a.setAttribute('download', filename);
+	let a = document.createElement('a');
+	a.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+	a.setAttribute('download', filename);
 
-    if (document.createEvent) {
-        let event = document.createEvent('MouseEvents');
-        event.initEvent('click', true, true);
-        a.dispatchEvent(event);
-    }
-    else {
-        a.click();
-    }
+	if (document.createEvent) {
+		let event = document.createEvent('MouseEvents');
+		event.initEvent('click', true, true);
+		a.dispatchEvent(event);
+	} else {
+		a.click();
+	}
 }
 
-
 //saving file into the system
-function saveFile(){
+function saveFile() {
 	drawer.classList.remove('move');
 	let modal = document.querySelector('.modal');
 	let file_input = document.querySelector('.input');
@@ -764,24 +760,128 @@ function saveFile(){
 	modal.classList.remove('modal_remove');
 	overlay.style.display = 'block';
 
-	file_input.addEventListener('change', e => {
+	file_input.addEventListener('change', (e) => {
 		title.innerText = e.target.value;
-	})
+	});
 
 	saveBtn.addEventListener('click', () => {
 		let data_file = JSON.stringify(sheets);
-		let filename = document.querySelector('.title span[id = "name"]').innerText + ".json";
+		let filename = document.querySelector('.title span[id = "name"]').innerText + '.json';
 		download(filename, data_file);
 		modal.classList.add('modal_remove');
 		overlay.style.display = 'none';
-	})
+	});
 
 	fileSaved = true;
-	title_span.innerText = "(saved)";
+	title_span.innerText = '(saved)';
 }
 
-save_btn.addEventListener('click', ()=> {
+//saving the current excel book
+save_btn.addEventListener('click', () => {
 	saveFile();
+});
+
+function removeSheets() {
+	for (let s of bottomSheets) {
+		s.remove();
+	}
+}
+
+function loadData(data) {
+	sheets = data;
+	sheetSelected = '1';
+	let sheetsContainer = document.querySelector('.sheets');
+	for (let key in data) {
+		let newSheet = document.createElement('div');
+		newSheet.innerText = 'Sheet ' + key;
+		newSheet.setAttribute('no', key);
+		newSheet.classList.add("sheetno")
+		addListenersToSheet(newSheet);
+		sheetsContainer.appendChild(newSheet);
+	}
+	let s1 = document.querySelector('div[no = "1"]');
+	s1.classList.add("sheet_selected")
+	loadCurrentSheetData(1);
+	resetSelectedCells();
+	resetHeader();
+}
+function openFile() {
+	let f = document.createElement('input');
+	let file;
+	f.setAttribute('type', 'file');
+	f.setAttribute('accept', 'application/json');
+
+	if (document.createEvent) {
+		let event = document.createEvent('MouseEvents');
+		event.initEvent('click', true, true);
+		f.dispatchEvent(event);
+	} else {
+		f.click();
+	}
+
+
+	f.addEventListener('change', (e) => {
+		file = e.target.files[0];
+		let reader = new FileReader();
+		reader.readAsText(file);
+		reader.onload = () => {
+			removeSheets();
+			loadData(JSON.parse(reader.result));
+
+			overlay.style.display = 'none';
+			drawer.classList.remove('move');
+		};
+	});
+}
+//opening excel book
+open_btn.addEventListener('click', () => {
+	openFile();
+});
+
+let cut_copy_btn = document.querySelectorAll('.menu_icon[id= "cut_copy"]');
+let paste_btn = document.querySelector('.menu_icon[name= "paste"]');
+let clipboard = {
+	start_cell:"",
+	action: "",
+	cells: []
+}
+
+for(let btn of cut_copy_btn){
+	btn.addEventListener('click', () => {
+		clipboard.start_cell = {...startCell};
+		clipboard.action = btn.getAttribute('name');
+		clipboard.cells = [];
+		let selectedCells = document.querySelectorAll('.selected');
+		for(let sc of selectedCells){
+			let row = sc.getAttribute('row');
+			let col = sc.getAttribute('col');
+			let key = row + "-" + col;
+			if(sheets[selectedSheet][key] != undefined){
+				clipboard.cells.push(key);
+			}
+		}
+	})
+}
+
+// paste
+paste_btn.addEventListener('click', () => {
+	for(let k of clipboard.cells){
+		let row = Number.parseInt(k.split('-')[0]);
+		let col = Number.parseInt(k.split('-')[1]);;
+		let cell = document.querySelector(`.cell[row = '${row}'][col = '${col}']`);
+		let key = row + "-" + col;
+
+		let nr = startCell.row + Math.abs(clipboard.start_cell.row - row);
+		let nc = startCell.col + Math.abs(clipboard.start_cell.col - col);
+		let newKey = nr + "-" + nc;
+		sheets[selectedSheet][newKey] = {
+				...sheets[selectedSheet][key]
+		}
+		if(clipboard.action === 'cut'){
+			delete sheets[selectedSheet][key]
+			addDataToCell({...DefaultProperties}, cell);
+		}
+	}
+	loadCurrentSheetData(selectedSheet);
 })
 
-//saving the current excel book
