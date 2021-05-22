@@ -11,6 +11,7 @@ let sheetNames = {
 	'1': ""
 }
 let selectedSheet = '1';
+let prevSelectedSheet = '1'
 let DefaultProperties = {
 	fontFamily: 'Noto Sans',
 	fontSize: 1.2,
@@ -548,16 +549,18 @@ function addDataToCell(obj, el) {
 	el.style.backgroundColor = obj.backgroundColor;
 	el.style.color = obj.color;
 	el.style.fontSize = obj.fontSize;
+	el.style.fontFamily = obj.fontFamily;
+	el.style.textAlign = obj.alignment;
 	if (obj.bold == true) {
-		e.classList.add('bold');
+		el.classList.add('bold');
 	}
 
 	if (obj.italic == true) {
-		e.classList.add('bold');
+		el.classList.add('italic');
 	}
 
 	if (obj.underline == true) {
-		e.classList.add('bold');
+		el.classList.add('ubderline');
 	}
 }
 
@@ -598,6 +601,7 @@ function sheetClickHandler(sheet) {
 	let no = sheet.getAttribute('no');
 
 	emptySheet(selectedSheet);
+	prevSelectedSheet = selectedSheet;
 	selectedSheet = no;
 	loadCurrentSheetData(no);
 
@@ -639,6 +643,7 @@ function createNewSheet() {
 
 	let newSheetNo = Number.parseInt(Object.keys(sheets).length) + 1 + '';
 	sheets[newSheetNo] = {};
+	prevSelectedSheet = selectedSheet;
 	selectedSheet = newSheetNo;
 
 	let bottomSheets = document.querySelectorAll('.sheetno');
@@ -843,21 +848,24 @@ let paste_btn = document.querySelector('.menu_icon[name= "paste"]');
 let clipboard = {
 	start_cell:"",
 	action: "",
-	cells: []
+	cells: {}
 }
 
+//cut and copy
 for(let btn of cut_copy_btn){
 	btn.addEventListener('click', () => {
 		clipboard.start_cell = {...startCell};
 		clipboard.action = btn.getAttribute('name');
-		clipboard.cells = [];
+		clipboard.cells = {};
 		let selectedCells = document.querySelectorAll('.selected');
 		for(let sc of selectedCells){
 			let row = sc.getAttribute('row');
 			let col = sc.getAttribute('col');
 			let key = row + "-" + col;
 			if(sheets[selectedSheet][key] != undefined){
-				clipboard.cells.push(key);
+				clipboard.cells[key + '-' + selectedSheet] = {
+					...sheets[selectedSheet][key]
+				};
 			}
 		}
 	})
@@ -865,21 +873,30 @@ for(let btn of cut_copy_btn){
 
 // paste
 paste_btn.addEventListener('click', () => {
-	for(let k of clipboard.cells){
+
+	for(let k in clipboard.cells){
 		let row = Number.parseInt(k.split('-')[0]);
-		let col = Number.parseInt(k.split('-')[1]);;
+		let col = Number.parseInt(k.split('-')[1]);
+		let sname = Number.parseInt(k.split('-')[2]);
 		let cell = document.querySelector(`.cell[row = '${row}'][col = '${col}']`);
+		let key = row + "-" + col;
+
+		if(clipboard.action === 'cut'){
+			delete sheets[sname][key]
+			addDataToCell({...DefaultProperties}, cell);
+		}
+	}
+	for(let k in clipboard.cells){
+		let row = Number.parseInt(k.split('-')[0]);
+		let col = Number.parseInt(k.split('-')[1]);
+		let sname = Number.parseInt(k.split('-')[2]);
 		let key = row + "-" + col;
 
 		let nr = startCell.row + Math.abs(clipboard.start_cell.row - row);
 		let nc = startCell.col + Math.abs(clipboard.start_cell.col - col);
-		let newKey = nr + "-" + nc;
+		let newKey = nr + "-" + nc + '-' + selectedSheet;
 		sheets[selectedSheet][newKey] = {
-				...sheets[selectedSheet][key]
-		}
-		if(clipboard.action === 'cut'){
-			delete sheets[selectedSheet][key]
-			addDataToCell({...DefaultProperties}, cell);
+				...clipboard.cells[key + '-' + sname]
 		}
 	}
 	loadCurrentSheetData(selectedSheet);
