@@ -21,7 +21,9 @@ let DefaultProperties = {
 	underline: false,
 	alignment: 'left',
 	backgroundColor: '',
-	color: ''
+	color: '',
+	formula: '',
+	children: []
 };
 let fileSaved = true;
 let title = document.querySelector('.title span[id = "name"]');
@@ -89,9 +91,10 @@ function getcols(cnt, arr, c, j) {
 	getcols(cnt, arr, String.fromCharCode(65 + j), j + 1);
 }
 
-function addAttribute(el, i, j) {
+function addAttribute(el, i, j, data) {
 	el.setAttribute('row', i);
 	el.setAttribute('col', j);
+	el.setAttribute('name', data+i);
 	if (el.nodeName === 'INPUT') {
 		el.setAttribute('type', 'text');
 		el.setAttribute('readonly', true);
@@ -118,7 +121,7 @@ function addCells(i, j, data) {
 		el = input;
 		el.classList.add('cell', 'editable_cell');
 	}
-	addAttribute(el, i, j);
+	addAttribute(el, i, j, data);
 	container.appendChild(el);
 }
 
@@ -264,6 +267,12 @@ function addRemoveFontProperties(obj, prop) {
 	}
 }
 
+//showing the current formula
+let formula_bar = document.querySelector('.formula_input');
+function addFormula(obj, prop){
+	formula_bar.value = obj[prop];
+}
+
 // changing the header when cell is clicked
 function changeHeader(row, col) {
 	let obj;
@@ -289,6 +298,8 @@ function changeHeader(row, col) {
 	//fontproperties
 	addRemoveFontProperties(obj, 'fontFamily');
 	addRemoveFontProperties(obj, 'fontSize');
+
+	addFormula(obj, 'formula')
 }
 
 //keydown event detects all keys
@@ -548,7 +559,7 @@ function addDataToCell(obj, el) {
 	el.value = obj.text;
 	el.style.backgroundColor = obj.backgroundColor;
 	el.style.color = obj.color;
-	el.style.fontSize = obj.fontSize;
+	el.style.fontSize = obj.fontSize + 'rem';
 	el.style.fontFamily = obj.fontFamily;
 	el.style.textAlign = obj.alignment;
 	if (obj.bold == true) {
@@ -863,7 +874,6 @@ for(let btn of cut_copy_btn){
 			let col = sc.getAttribute('col');
 			let key = row + "-" + col;
 			if(sheets[selectedSheet][key] != undefined){
-				console.log("running");
 				clipboard.cells[key + '-' + selectedSheet] = {
 					...sheets[selectedSheet][key]
 				};
