@@ -736,7 +736,7 @@ let new_btn = document.querySelector('.items.new');
 let save_btn = document.querySelector('.items.save');
 let open_btn = document.querySelector('.items.open');
 new_btn.addEventListener('click', () => {
-	window.open('http://127.0.0.1:5500/');
+	window.open('http://excel-clone.surge.sh');
 	drawer.classList.remove('move');
 	drawer.style.transitionDuration = '0s';
 	overlay.style.display = 'none';

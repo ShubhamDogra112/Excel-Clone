@@ -189,7 +189,7 @@ function formulaChangeHandler(values) {
     let selectedCell = document.querySelector('.cell.selected');
     let name = selectedCell.getAttribute('name');  ///gives A12 / B3
 //values.includes(name) = when B1 the parent of B1
-    if(values.includes(name) || checkCycle(name, values)){
+    if(values.includes(name) || checkCycle(name, [...values.split(" ")])){
         alert("cycle detected");
         return true;
     }
