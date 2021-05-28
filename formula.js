@@ -156,6 +156,7 @@ function setChildren(cellName, formula){
 
 
 function checkCycle(cellName, formulaTokens) {
+    console.log("running");
     let cell = document.querySelector(`.cell[name = '${cellName}']`);
     let row = cell.getAttribute('row');
     let col = cell.getAttribute('col');
@@ -178,7 +179,12 @@ function checkCycle(cellName, formulaTokens) {
                 }
             }
         }
-        return checkCycle(child, formulaTokens);
+
+        //checking the cycle in child if child return false then we check for other child
+        //if we have found cycle in one child then simply return
+         if(checkCycle(child, formulaTokens)){
+             return true;
+        };
     }
     return false;  //cycle not found
 }
@@ -189,7 +195,7 @@ function formulaChangeHandler(values) {
     let selectedCell = document.querySelector('.cell.selected');
     let name = selectedCell.getAttribute('name');  ///gives A12 / B3
 //values.includes(name) = when B1 the parent of B1
-    if(values.includes(name) || checkCycle(name, values)){
+    if(values.includes(name) || checkCycle(name, [...values.split(" ")])){
         alert("cycle detected");
         return true;
     }
