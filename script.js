@@ -41,6 +41,7 @@ title.addEventListener('keydown', (e) => {
 });
 
 function updateSheetData(property, value) {
+	console.log("sheet data running");
 	fileSaved = false;
 	title_span.innerText = '(unsaved)';
 	if (value !== DefaultProperties[property]) {
@@ -386,7 +387,21 @@ for (let cell of cells) {
 	});
 
 	cell.addEventListener('change', (e) => {
-		updateSheetData('text', e.target.value);
+		let r = cell.getAttribute('row');
+		let c = cell.getAttribute('col');
+		let key = r + "-" + c;
+		if (sheets[selectedSheet][key] == undefined) {
+			sheets[selectedSheet][key] = {};
+			sheets[selectedSheet][key] = {
+				...DefaultProperties,
+				text: e.target.value
+			};
+		} else {
+			sheets[selectedSheet][key] = {
+				...sheets[selectedSheet][key],
+				text: e.target.value
+			};
+		}
 	});
 }
 
@@ -736,7 +751,7 @@ let new_btn = document.querySelector('.items.new');
 let save_btn = document.querySelector('.items.save');
 let open_btn = document.querySelector('.items.open');
 new_btn.addEventListener('click', () => {
-	window.open('http://excel-clone.surge.sh');
+	window.open('http://127.0.0.1:5500/');
 	drawer.classList.remove('move');
 	drawer.style.transitionDuration = '0s';
 	overlay.style.display = 'none';
@@ -746,7 +761,7 @@ new_btn.addEventListener('click', () => {
 window.addEventListener('beforeunload', function(e) {
 	e.preventDefault();
 	if (!fileSaved) {
-		e.returnValue = 'Are you sure you want to leave the website?';
+		e.returnValue = 'Arr you sure you want to leave the website?';
 	} else {
 		console.log('No changes in the file');
 	}
@@ -866,6 +881,7 @@ let clipboard = {
 for(let btn of cut_copy_btn){
 	btn.addEventListener('click', () => {
 		clipboard.start_cell = {...startCell};
+	
 		clipboard.action = btn.getAttribute('name');
 		clipboard.cells = {};
 		let selectedCells = document.querySelectorAll('.selected');
@@ -879,6 +895,7 @@ for(let btn of cut_copy_btn){
 				};
 			}
 		}
+
 	})
 }
 
@@ -914,4 +931,3 @@ paste_btn.addEventListener('click', () => {
 	}
 	loadCurrentSheetData(selectedSheet);
 })
-
