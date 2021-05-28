@@ -41,7 +41,6 @@ title.addEventListener('keydown', (e) => {
 });
 
 function updateSheetData(property, value) {
-	console.log("sheet data running");
 	fileSaved = false;
 	title_span.innerText = '(unsaved)';
 	if (value !== DefaultProperties[property]) {
